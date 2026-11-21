@@ -11,4 +11,7 @@ export class ConfiguracionEntity {
   @Column('float')
   tolerancia!: number;
 
+  @Column('boolean')
+  alertas!: boolean;
+
 }

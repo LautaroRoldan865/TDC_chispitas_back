@@ -1,4 +1,4 @@
-import { IsNumber, Max, Min, IsOptional } from 'class-validator';
+import { IsNumber, Max, Min, IsOptional, IsBoolean } from 'class-validator';
 import { RangoValido } from '../validator/rango-valido.validator';
 
 export class EditarConfiguracionDto {
@@ -12,5 +12,9 @@ export class EditarConfiguracionDto {
   @IsNumber()
   @RangoValido()
   tolerancia!: number;
+
+  @IsOptional()
+  @IsBoolean()
+  alertas!: boolean;
 
 }
