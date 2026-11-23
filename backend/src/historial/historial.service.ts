@@ -5,6 +5,8 @@ import { Repository } from 'typeorm/repository/Repository.js';
 import { CrearHistorialDto } from './dtos/crear-historial.dto';
 import { ResponseCurrentStateDto } from './dtos/reponse-current-state';
 import { HistorialCompletoDTO } from './dtos/response-historial-completo';
+import { TelegramService } from '../telegram/telegram.service';
+import { ConfiguracionService } from '../configuracion/configuracion.service';
 
 @Injectable()
 export class HistorialService {
@@ -12,6 +14,8 @@ export class HistorialService {
     constructor(
         @InjectRepository(HistorialEntity)
         private readonly repository:Repository<HistorialEntity>,
+        private readonly telegramService: TelegramService,
+        private readonly configuracionService: ConfiguracionService,
     ) {}
 
     async crearHistorial(datos: CrearHistorialDto) {
@@ -20,7 +24,26 @@ export class HistorialService {
             fecha: new Date()
         });
 
-        return await this.repository.save(historial);
+        const guardado = await this.repository.save(historial);
+        // 🔔 Lógica de alerta Telegram
+        try {
+            const configs = await this.configuracionService.obtenerActual();
+            const config = configs[0]; // obtenerActual() devuelve un array
+            if (config && config.alertas) {
+                const min = config.setpoint - config.tolerancia;
+                const max = config.setpoint + config.tolerancia;
+                if (datos.temperatura < min || datos.temperatura > max) {
+                    await this.telegramService.enviarMensaje(
+                        `⚠️ Alerta de temperatura!\n` +
+                        `Temperatura actual: ${datos.temperatura}°C\n` +
+                        `Rango permitido: ${min}°C – ${max}°C`
+                    );
+                }
+            }
+        } catch {
+            // No interrumpir el guardado si Telegram falla
+        }
+        return guardado;
     }
 
     async obtenerHistorial(fechaDesde?: Date, fechaHasta?: Date): Promise<HistorialCompletoDTO> {
