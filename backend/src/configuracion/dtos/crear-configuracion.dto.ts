@@ -9,7 +9,7 @@ export class CrearConfiguracionDto {
   setpoint!: number;
 
   @IsNumber()
-  @RangoValido()
+  @Min(0)
   tolerancia!: number;
 
   @IsBoolean()
