@@ -1,6 +1,16 @@
+import { IsNumber, IsString, MaxLength } from 'class-validator';
+
 export class CrearHistorialDto {
-    temperatura!: number;
-    rpm!: number;
-    velocidad!: number;
-    color!: string;
+  @IsNumber()
+  temperatura!: number;
+
+  @IsNumber()
+  rpm!: number;
+
+  @IsNumber()
+  velocidad!: number;
+
+  @IsString()
+  @MaxLength(50)
+  color!: string;
 }
